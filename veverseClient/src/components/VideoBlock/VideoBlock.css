@@ -1,0 +1,17 @@
+.videoblock {
+  flex: 0.8;
+  background-color: rgb(254, 255, 255);
+  padding: 20px 20px;
+  padding-bottom: 0;
+  margin-left: 50px;
+}
+
+.videoblock > h2 {
+  margin-left: 5px;
+  margin-bottom: 20px;
+}
+
+.videoblockvideo {
+  display: flex;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,17 @@
+.leftmenubar {
+  flex: 0.2;
+  background-color: rgb(255, 255, 255);
+}
+
+.leftmenubar > hr {
+  height: 1px;
+  border: 0;
+  background-color: grey;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.leftmenubar_link {
+  text-decoration: none;
+  color: black;
+}

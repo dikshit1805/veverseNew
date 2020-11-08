@@ -1,0 +1,46 @@
+.menurow {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.title {
+  flex: 1;
+  margin-left: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.icon {
+  color: gray;
+  font-size: large !important;
+}
+
+.menurow:hover {
+  background-color: lightblue;
+  cursor: pointer;
+}
+
+.menurow:hover > .icon {
+  color: rgb(119, 119, 201);
+}
+
+.menurow:hover > .title {
+  font-weight: bold;
+}
+
+.menurow.selected {
+  background-color: lightblue;
+  cursor: pointer;
+}
+
+.menurow.selected > .icon {
+  color: rgb(119, 119, 201);
+}
+.menurow.selected > .title {
+  font-weight: bold;
+}
+
+.menurow > Link {
+  text-decoration: none;
+}
