@@ -7,7 +7,7 @@ import VideoBlock from './components/VideoBlock/VideoBlock';
 
 import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
 import SearchPage from './components/SearchPage/SearchPage';
-
+import VideoPlayback from './components/VideoPlayback/VideoPlayback';
 
 function App() {
   return (
@@ -15,6 +15,11 @@ function App() {
       <Router>
         <NavigationBar/>
         <Switch>
+          <Route path="/searchvideo/:videoID">
+            <div className="app_body">
+              <VideoPlayback/>
+            </div>
+          </Route>
           <Route path="/Search/:searchkey">
           <div className="app_body">
               <LeftMenuBar/>

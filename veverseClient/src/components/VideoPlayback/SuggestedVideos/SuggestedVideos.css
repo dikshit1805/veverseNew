@@ -1,27 +1,20 @@
-.searchpage {
-  flex: 0.8;
+.suggestedpage {
   background-color: rgb(254, 255, 255);
   padding: 20px 20px;
   padding-bottom: 0;
   margin-left: 50px;
+  
 }
 
 
-.searchpage > h2 {
+.suggestedpage > h2 {
   margin-left: 5px;
   margin-bottom: 20px;
 }
 
-.searchpageblock {
+.suggestedpageblock {
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
-  overflow: Scroll;
-  width: 100%;
-  height: 85vh;
   text-decoration: none !important;
-}
-
-.searchpageblock::-webkit-scrollbar {
-  display: none;
 }

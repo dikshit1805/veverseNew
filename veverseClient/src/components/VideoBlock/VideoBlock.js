@@ -2,51 +2,38 @@ import React from 'react'
 import "./VideoBlock.css"
 import VideoCard from './VideoCard/VideoCard'
 import axios from "../../axios";
-import {useState,useEffect, useRef } from 'react'
-
+import {useState,useEffect } from 'react'
+import {Link} from "react-router-dom"
 
 function VideoBlock() {
   const [recommendations, setrecommendations] = useState([]);
-  let htmlString = '';
-  // let parse = require('html-react-parser');
+  
   useEffect(()=>{
     async function fetchData() {
-      const request = await  axios.get("/recommendations/1");
+      const request = await  axios.get("/recommendation");
       return(request.data.results);
-      //   data.forEach(result => {
-      //        { image="${result["thumbnail_path"]}"
-      //       title="${result["title"]}"
-      //       views="${result["views"]}"
-      //       timestamp="${result["date"]}"
-      //       video_path="${result["video_path"]}";
-      //   });
-        
-        // return parse(htmlString);
     }
-
-
-    fetchData().then(result=>setrecommendations(result));
-
-    // console.log(htmlData);
-    // setrecommendations(htmlData);
-  },[htmlString]);
-
-console.log(recommendations);
-
-
+    fetchData().then(result=>{setrecommendations(result)});
+    
+  },[]);
 
   return (
     <div className="videoblock">
       <h2>Recommendation</h2>
+      
       <div className="videoblockvideo" >
         {recommendations.map((result) => (
-            <VideoCard image= {result["thumbnail_path"]}
+          
+          <Link key={`Link_${result["videoID"]}`} className="videoRow_link" to={{pathname:`/searchvideo/${result["videoID"]}`,path:result["video_path"]}}>
+            <VideoCard key={result["videoID"]} image= {result["thumbnail_path"]}
             title={result["title"]}
             views={result["views"]}
-            timestamp={result["date"]}
+            timestamp={new Date(result["date"])}
             likes={result["likes"]}
-            video_path={result["video_path"]} />)
-        )}
+            video_path={result["video_path"]} 
+            profile_pic={result["profile_pic"]}/>
+          </Link>
+          ))}
       </div>
     </div>
   )

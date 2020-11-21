@@ -107,38 +107,18 @@ const createUnixSocketPool = async (config) => {
     ...config
   });
 }
+
 // [END cloud_sql_mysql_mysql_create_socket]
 
 
 
 const createPool = async () => {
   const config = {
-    // [START cloud_sql_mysql_mysql_limit]
-    // 'connectionLimit' is the maximum number of connections the pool is allowed
-    // to keep at once.
     connectionLimit: 5,
-    // [END cloud_sql_mysql_mysql_limit]
-
-    // [START cloud_sql_mysql_mysql_timeout]
-    // 'connectTimeout' is the maximum number of milliseconds before a timeout
-    // occurs during the initial connection to the database.
     connectTimeout: 10000, // 10 seconds
-    // 'acquireTimeout' is the maximum number of milliseconds to wait when
-    // checking out a connection from the pool before a timeout error occurs.
     acquireTimeout: 10000, // 10 seconds
-    // 'waitForConnections' determines the pool's action when no connections are
-    // free. If true, the request will queued and a connection will be presented
-    // when ready. If false, the pool will call back with an error.
     waitForConnections: true, // Default: true
-    // 'queueLimit' is the maximum number of requests for connections the pool
-    // will queue at once before returning an error. If 0, there is no limit.
     queueLimit: 0, // Default: 0
-    // [END cloud_sql_mysql_mysql_timeout]
-
-    // [START cloud_sql_mysql_mysql_backoff]
-    // The mysql module automatically uses exponential delays between failed
-    // connection attempts.
-    // [END cloud_sql_mysql_mysql_backoff]
   }
   return await createUnixSocketPool(config);
     
@@ -171,132 +151,39 @@ app.use(async (req, res, next) => {
 });
 
 
-
-
-
-// [START getting_started_auth_front_controller]
+// Home Page
 app.get('/', async (req, res) => {
   console.log("hitting.......");
-  //const assertion = req.header('X-Goog-IAP-JWT-Assertion');
-  // let email = 'None';
   let emailAddrss = 'None';
-  // try {
-  //   const info = await validateAssertion(assertion);
-  //   email = info.email;
-  // } catch (error) {
-  //   console.log(error);
-  // }
-  // [START cloud_sql_mysql_mysql_connection]
   try {
     const stmt = 'SELECT * FROM VeverseDB.Users';
-    // Pool.query automatically checks out, uses, and releases a connection
-    // back into the pool, ensuring it is always returned successfully.
     emailAddrss = await pool.query(stmt);
   } catch (err) {
-    // If something goes wrong, handle the error in this section. This might
-    // involve retrying or adjusting parameters depending on the situation.
-    // [START_EXCLUDE]
     console.log(err);
     return res
       .status(501)
-      .send(
-        'Unable to successfully cast vote! Please check the application logs for more details.'
-      )
+      .send('No Users Found.')
       .end();
-    // [END_EXCLUDE]
   }
-
-  // [END cloud_sql_mysql_mysql_connection]
   let emailStr={} ;
-  // [END cloud_sql_mysql_mysql_connection]
   emailAddrss.forEach(element => {
-    emailStr[element.emailID] = {"first_name" : element.first_name,
-                                  "last_name" : element.last_name};
+    emailStr[element.emailID] = {"first_name" : element.first_name,"last_name" : element.last_name};
   });
   console.log(JSON.stringify(emailStr));
   res.end(JSON.stringify(emailStr));
 });
 
-app.get('/recommendations/:pageNum', async (req, res) => {
-  
-  const perPageVideoCount = 15;
-  let jsonResult = {"results" : []};
-  let pageNum = (req.params.pageNum - 1) * perPageVideoCount;
-  try {
-    const stmt = `SELECT videoID,thumbnail_path,title,views,date,video_path FROM VeverseDB.Video order by views desc limit ${pageNum},${perPageVideoCount};`;
-    // Pool.query automatically checks out, uses, and releases a connection
-    // back into the pool, ensuring it is always returned successfully.
-    let queryObj = await pool.query(stmt);
 
-    //Populating Results
-    queryObj.forEach(row => {
-      jsonResult["results"].push({
-        "videoID": row["videoID"],
-        "thumbnail_path":row["thumbnail_path"] ,
-        "title": row["title"],
-        "views":row["views"],
-        "date": row["date"],
-        "video_path": row["video_path"]
-      });
-    });
-    res.end(JSON.stringify(jsonResult));
-  } catch (err) {
-    // If something goes wrong, handle the error in this section. This might
-    // involve retrying or adjusting parameters depending on the situation.
-    // [START_EXCLUDE]
-    console.log(err);
-    return res
-      .status(501)
-      .send(
-        'Unable to successfully cast vote! Please check the application logs for more details.'
-      )
-      .end();
-    // [END_EXCLUDE]
-  }
-  
-});
-app.post('/registration/', async (req, res) => {
-  
-  var emailID = req.body.emailID;
-  var first_name = req.body.first_name;
-  var last_name = req.body.last_name;
-  try {
-    const stmt = `INSERT INTO VeverseDB.Users (emailID, first_name, last_name) VALUES (${emailID}, ${first_name}, ${last_name});`
-    // Pool.query automatically checks out, uses, and releases a connection
-    // back into the pool, ensuring it is always returned successfully.
-    pool.query(stmt);
-    res.end('registration successfull');
-  } catch (err) {
-    // If something goes wrong, handle the error in this section. This might
-    // involve retrying or adjusting parameters depending on the situation.
-    // [START_EXCLUDE]
-    console.log(err);
-    return res
-      .status(501)
-      .send(
-        'Unable to register.'
-      )
-      .end();
-    // [END_EXCLUDE]
-  }
-  
-});
+// Search Videos based on tagName
 app.post('/search/videos', async (req, res) => {
-  console.log("hitting search");
-  //return res.send("working");
-  var key1 = req.body.key1;
-  var key2 = req.body.key2;
-  var key3 = req.body.key3;
-  
-
+  var key = req.body.key  ;
+  let keyStr = key.split(" ").map(element => (`tagName LIKE '%${element}%'`)).join(" or ");  
   let jsonResult = {"results" : []};
   try {
     const stmt = `SELECT distinct  Video.videoID,thumbnail_path,title,views,date,video_path,likes 
     FROM  VeverseDB.Video 
     inner join VeverseDB.VideoTags on Video.videoID=VideoTags.videoID
-    where  tagName='${key1}' or tagName='${key2}' or tagName='${key3}' ;`;
-    // Pool.query automatically checks out, uses, and releases a connection
-    // back into the pool, ensuring it is always returned successfully.
+    where  ${keyStr} ;`;
     let queryObj = await pool.query(stmt);
     queryObj.forEach(row => {
       jsonResult["results"].push({
@@ -311,22 +198,120 @@ app.post('/search/videos', async (req, res) => {
     });
     res.end(JSON.stringify(jsonResult));
   } catch (err) {
-    // If something goes wrong, handle the error in this section. This might
-    // involve retrying or adjusting parameters depending on the situation.
-    // [START_EXCLUDE]
+    console.log(err);
+    return res
+      .status(501)
+      .send('Unable to Search Videos.')
+      .end();
+  }
+});
+
+
+//Get Recommendations
+app.get('/recommendations/:pageNum', async (req, res) => {
+  const perPageVideoCount = 15;
+  let jsonResult = {"results" : []};
+  let pageNum = (req.params.pageNum - 1) * perPageVideoCount;
+  try {
+    const stmt = `SELECT videoID,thumbnail_path,title,views,date,video_path FROM VeverseDB.Video order by views desc limit ${pageNum},${perPageVideoCount};`;
+    let queryObj = await pool.query(stmt);
+    //Populating Results
+    queryObj.forEach(row => {
+      jsonResult["results"].push({
+        "videoID": row["videoID"],
+        "thumbnail_path":row["thumbnail_path"] ,
+        "title": row["title"],
+        "views":row["views"],
+        "date": row["date"],
+        "video_path": row["video_path"]
+      });
+    });
+    res.end(JSON.stringify(jsonResult));
+  } catch (err) {
     console.log(err);
     return res
       .status(501)
       .send(
-        'Unable to register.'
+        'Unable to successfully cast vote! Please check the application logs for more details.'
       )
       .end();
-    // [END_EXCLUDE]
   }
-  
 });
 
-// [END getting_started_auth_front_controller]
+// Video and Video description
+app.get('/videoInfo/:videoID', async (req, res) => {
+
+  const jsonResult = {"Video":{}, "VideoTags":[]}
+  const videoID = req.params.videoID;
+  try {
+    
+    if(!videoID) {
+      return res
+      .status(501)
+      .send(JSON.stringify({"err":err}))
+      .end();
+    }
+
+    let stmt = `SELECT first_name, last_name, title, views, likes, category, video_path from VeverseDB.Video,VeverseDB.Users where VeverseDB.Video.videoID = '${videoID}' and VeverseDB.Video.emailID = VeverseDB.Users.emailID;`;
+    let queryObj = await pool.query(stmt);
+    //Populating Results
+    console.log(queryObj);
+    queryObj.forEach(row => {
+      jsonResult["Video"] = {
+        "first_name": row["first_name"],
+        "last_name": row["last_name"],
+        "title": row["title"],
+        "views":row["views"],
+        "likes": row["likes"],
+        "category":row["category"],
+        "video_path": row["video_path"]
+      }
+    });
+
+    stmt = `SELECT tagName from VeverseDB.VideoTags 
+    where videoID = ${videoID};`;
+    queryObj = await pool.query(stmt);
+    //Populating Results
+    queryObj.forEach(row => {
+      jsonResult["VideoTags"].push(row["tagName"]);
+    });
+
+
+    res.end(JSON.stringify(jsonResult));
+  } catch (err) {
+    return res
+      .status(501)
+      .send(JSON.stringify({"err":err}))
+      .end();
+  }
+
+})
+
+
+// /videoDescription/${videoID}
+
+// `/videoComment/${videoID}`
+
+
+
+//Registration
+app.post('/registration/', async (req, res) => {
+  var emailID = req.body.emailID;
+  var first_name = req.body.first_name;
+  var last_name = req.body.last_name;
+  try {
+    const stmt = `INSERT INTO VeverseDB.Users (emailID, first_name, last_name) VALUES (${emailID}, ${first_name}, ${last_name});`
+    pool.query(stmt);
+    res.end('registration successfull');
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(501)
+      .send('Unable to register.')
+      .end();
+  }
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 8080;

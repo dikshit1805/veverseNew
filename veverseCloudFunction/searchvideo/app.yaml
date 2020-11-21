@@ -10,12 +10,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-service : dikshitbackend
 runtime: nodejs10
 
 env_variables:
   DB_USER: test
   DB_PASS: test
-  DB_NAME: VeverseDB
+  DB_NAME: veverseMySqlDatabase
   # e.g. my-awesome-project:us-central1:my-cloud-sql-instance
-  CLOUD_SQL_CONNECTION_NAME: veversenew:us-central1:veversenew
+  CLOUD_SQL_CONNECTION_NAME: veversedikshit:us-central1:veversedatabase

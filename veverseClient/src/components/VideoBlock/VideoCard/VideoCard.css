@@ -4,13 +4,16 @@
 }
 
 .videocard:hover {
-  transform: scale(1.08);
+  transform: scale(1.04);
   cursor: pointer;
 }
 
 .videocard_thumbnail {
   height: 140px;
   width: 250px;
+  border: 2px solid black;
+  background-color: black;
+  border-radius: 5px;
 }
 
 .videocard_info {
@@ -24,8 +27,13 @@
 }
 
 .videocard_text > h4 {
-  font-size: 14px;
-  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* number of lines to show */
+  line-height: 1.5rem;        /* fallback */
+  max-height: 1.5rem*2;  
 }
 
 .videocard_text > p {
