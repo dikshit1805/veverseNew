@@ -8,6 +8,7 @@ import VideoBlock from './components/VideoBlock/VideoBlock';
 import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
 import SearchPage from './components/SearchPage/SearchPage';
 import VideoPlayback from './components/VideoPlayback/VideoPlayback';
+import UploadVideo from './components/UploadVideo/UploadVideo';
 
 function App() {
   return (
@@ -25,6 +26,12 @@ function App() {
               <LeftMenuBar/>
               <SearchPage/>
           </div>
+          </Route>
+          <Route path="/upload">
+          <div className="app_body">
+              <LeftMenuBar/>
+              <UploadVideo/>
+            </div>
           </Route>
           <Route path="/">
             <div className="app_body">

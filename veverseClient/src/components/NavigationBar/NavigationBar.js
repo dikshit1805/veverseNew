@@ -7,10 +7,10 @@ import VideoCallIcon from '@material-ui/icons/VideoCall';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import SearchIcon from '@material-ui/icons/Search';
-
+import UploadVideo from '../UploadVideo/UploadVideo';
 function NavigationBar() {
   const [inputSearch, setInputSearch] = useState("");
-
+  const [upload, setUpload] = useState("");
   return (
     <div className="navigationbar">
       
@@ -29,7 +29,12 @@ function NavigationBar() {
       </div>
       
       <div className="header_right">
-        <VideoCallIcon className="header_right_icon"/>
+         
+      
+      <Link to={`upload/`} ><VideoCallIcon className="header_right_icon" onClick={e => setUpload(e.target.value)} value={upload}/></Link>
+      
+         
+        
         <AccountCircleIcon className="header_right_icon"/>
         <ExitToAppIcon className="header_right_icon"/>
       </div>

@@ -24,18 +24,38 @@ var cors = require('cors');
 const mysql = require('promise-mysql');
 const bodyParser = require('body-parser');
 
+const multer = require('multer')
+const multerMid = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    // no larger than 100mb.
+    fileSize: 100 * 1024 * 1024,
+  },
+});
+const uploadFile = require('./helpers/helpers')
 
-//require('@google-cloud/debug-agent').start({serviceContext: {enableCanary: true}});
+
+
+
+
 
 const app = express();
+//for cors
 app.use(cors());
+//for upload
+app.disable('x-powered-by')
+app.use(multerMid.array('file'))
+
+
 //const oAuth2Client = new OAuth2Client();
 app.set('view engine', 'pug');
 app.enable('trust proxy');
 
 // Automatically parse request body as form data.
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({limit:'100mb',extended: true} ));
+app.use(bodyParser.json({limit:'100mb'}));
+
 
 // Set Content-Type for all responses for these routes.
 app.use((req, res, next) => {
@@ -46,50 +66,7 @@ app.use((req, res, next) => {
 });
 
 
-// Cache externally fetched information for future invocations
-//let aud;
 
-// [START getting_started_auth_metadata]
-// async function audience() {
-//   if (!aud && (await metadata.isAvailable())) {
-//     let project_number = await metadata.project('numeric-project-id');
-//     let project_id = await metadata.project('project-id');
-
-//     aud = '/projects/' + project_number + '/apps/' + project_id;
-//   }
-
-//   return aud;
-// }
-// [END getting_started_auth_metadata]
-
-// [START getting_started_auth_audience]
-// async function validateAssertion(assertion) {
-//   if (!assertion) {
-//     return {};
-//   }
-
-  // Check that the assertion's audience matches ours
-  //const aud = await audience();
-
-  // Fetch the current certificates and verify the signature on the assertion
-  // [START getting_started_auth_certs]
-  // const response = await oAuth2Client.getIapPublicKeys();
-  // // [END getting_started_auth_certs]
-  // const ticket = await oAuth2Client.verifySignedJwtWithCertsAsync(
-  //   assertion,
-  //   response.pubkeys,
-  //   aud,
-  //   ['https://cloud.google.com/iap']
-  // );
-  // const payload = ticket.getPayload();
-
-  // Return the two relevant pieces of information
-//   return {
-//     email: payload.email,
-//     sub: payload.sub,
-//   };
-// }
-// [END getting_started_auth_audience]
 
 
 // [START cloud_sql_mysql_mysql_create_socket]
@@ -107,18 +84,38 @@ const createUnixSocketPool = async (config) => {
     ...config
   });
 }
-
 // [END cloud_sql_mysql_mysql_create_socket]
 
 
 
 const createPool = async () => {
   const config = {
+    // [START cloud_sql_mysql_mysql_limit]
+    // 'connectionLimit' is the maximum number of connections the pool is allowed
+    // to keep at once.
     connectionLimit: 5,
+    // [END cloud_sql_mysql_mysql_limit]
+
+    // [START cloud_sql_mysql_mysql_timeout]
+    // 'connectTimeout' is the maximum number of milliseconds before a timeout
+    // occurs during the initial connection to the database.
     connectTimeout: 10000, // 10 seconds
+    // 'acquireTimeout' is the maximum number of milliseconds to wait when
+    // checking out a connection from the pool before a timeout error occurs.
     acquireTimeout: 10000, // 10 seconds
+    // 'waitForConnections' determines the pool's action when no connections are
+    // free. If true, the request will queued and a connection will be presented
+    // when ready. If false, the pool will call back with an error.
     waitForConnections: true, // Default: true
+    // 'queueLimit' is the maximum number of requests for connections the pool
+    // will queue at once before returning an error. If 0, there is no limit.
     queueLimit: 0, // Default: 0
+    // [END cloud_sql_mysql_mysql_timeout]
+
+    // [START cloud_sql_mysql_mysql_backoff]
+    // The mysql module automatically uses exponential delays between failed
+    // connection attempts.
+    // [END cloud_sql_mysql_mysql_backoff]
   }
   return await createUnixSocketPool(config);
     
@@ -151,168 +148,184 @@ app.use(async (req, res, next) => {
 });
 
 
-// Home Page
-app.get('/', async (req, res) => {
-  console.log("hitting.......");
-  let emailAddrss = 'None';
-  try {
-    const stmt = 'SELECT * FROM VeverseDB.Users';
-    emailAddrss = await pool.query(stmt);
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(501)
-      .send('No Users Found.')
-      .end();
-  }
-  let emailStr={} ;
-  emailAddrss.forEach(element => {
-    emailStr[element.emailID] = {"first_name" : element.first_name,"last_name" : element.last_name};
-  });
-  console.log(JSON.stringify(emailStr));
-  res.end(JSON.stringify(emailStr));
-});
-
-
-// Search Videos based on tagName
-app.post('/search/videos', async (req, res) => {
-  var key = req.body.key  ;
-  let keyStr = key.split(" ").map(element => (`tagName LIKE '%${element}%'`)).join(" or ");  
-  let jsonResult = {"results" : []};
-  try {
-    const stmt = `SELECT distinct  Video.videoID,thumbnail_path,title,views,date,video_path,likes 
-    FROM  VeverseDB.Video 
-    inner join VeverseDB.VideoTags on Video.videoID=VideoTags.videoID
-    where  ${keyStr} ;`;
-    let queryObj = await pool.query(stmt);
-    queryObj.forEach(row => {
-      jsonResult["results"].push({
-        "videoID": row["videoID"],
-        "thumbnail_path":row["thumbnail_path"] ,
-        "title": row["title"],
-        "views":row["views"],
-        "date": row["date"],
-        "likes":row["likes"],
-        "video_path": row["video_path"]
-      });
-    });
-    res.end(JSON.stringify(jsonResult));
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(501)
-      .send('Unable to Search Videos.')
-      .end();
-  }
-});
-
-
-//Get Recommendations
-app.get('/recommendations/:pageNum', async (req, res) => {
-  const perPageVideoCount = 15;
-  let jsonResult = {"results" : []};
-  let pageNum = (req.params.pageNum - 1) * perPageVideoCount;
-  try {
-    const stmt = `SELECT videoID,thumbnail_path,title,views,date,video_path FROM VeverseDB.Video order by views desc limit ${pageNum},${perPageVideoCount};`;
-    let queryObj = await pool.query(stmt);
-    //Populating Results
-    queryObj.forEach(row => {
-      jsonResult["results"].push({
-        "videoID": row["videoID"],
-        "thumbnail_path":row["thumbnail_path"] ,
-        "title": row["title"],
-        "views":row["views"],
-        "date": row["date"],
-        "video_path": row["video_path"]
-      });
-    });
-    res.end(JSON.stringify(jsonResult));
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(501)
-      .send(
-        'Unable to successfully cast vote! Please check the application logs for more details.'
-      )
-      .end();
-  }
-});
-
-// Video and Video description
-app.get('/videoInfo/:videoID', async (req, res) => {
-
-  const jsonResult = {"Video":{}, "VideoTags":[]}
-  const videoID = req.params.videoID;
-  try {
-    
-    if(!videoID) {
-      return res
-      .status(501)
-      .send(JSON.stringify({"err":err}))
-      .end();
-    }
-
-    let stmt = `SELECT first_name, last_name, title, views, likes, category, video_path from VeverseDB.Video,VeverseDB.Users where VeverseDB.Video.videoID = '${videoID}' and VeverseDB.Video.emailID = VeverseDB.Users.emailID;`;
-    let queryObj = await pool.query(stmt);
-    //Populating Results
-    console.log(queryObj);
-    queryObj.forEach(row => {
-      jsonResult["Video"] = {
-        "first_name": row["first_name"],
-        "last_name": row["last_name"],
-        "title": row["title"],
-        "views":row["views"],
-        "likes": row["likes"],
-        "category":row["category"],
-        "video_path": row["video_path"]
-      }
-    });
-
-    stmt = `SELECT tagName from VeverseDB.VideoTags 
-    where videoID = ${videoID};`;
-    queryObj = await pool.query(stmt);
-    //Populating Results
-    queryObj.forEach(row => {
-      jsonResult["VideoTags"].push(row["tagName"]);
-    });
-
-
-    res.end(JSON.stringify(jsonResult));
-  } catch (err) {
-    return res
-      .status(501)
-      .send(JSON.stringify({"err":err}))
-      .end();
-  }
-
-})
-
-
-// /videoDescription/${videoID}
-
-// `/videoComment/${videoID}`
 
 
 
-//Registration
+
+
+
 app.post('/registration/', async (req, res) => {
+  
   var emailID = req.body.emailID;
   var first_name = req.body.first_name;
   var last_name = req.body.last_name;
   try {
-    const stmt = `INSERT INTO VeverseDB.Users (emailID, first_name, last_name) VALUES (${emailID}, ${first_name}, ${last_name});`
+    const stmt = `INSERT INTO veverseMySqlDatabase.Users (emailID, first_name, last_name) VALUES (${emailID}, ${first_name}, ${last_name});`
+    // Pool.query automatically checks out, uses, and releases a connection
+    // back into the pool, ensuring it is always returned successfully.
     pool.query(stmt);
     res.end('registration successfull');
   } catch (err) {
+    // If something goes wrong, handle the error in this section. This might
+    // involve retrying or adjusting parameters depending on the situation.
+    // [START_EXCLUDE]
     console.log(err);
     return res
       .status(501)
-      .send('Unable to register.')
+      .send(
+        'Unable to register.'
+      )
       .end();
+    // [END_EXCLUDE]
   }
+  
+});
+app.post('/search/videos', async (req, res) => {
+  console.log("hitting search");
+  //return res.send("working");
+  var key1 = req.body.key1;
+  var key2 = req.body.key2;
+  var key3 = req.body.key3;
+  
+
+  let jsonResult = {"results" : []};
+  try {
+    const stmt = `SELECT distinct  Video.videoID,thumbnail_path,title,views,date,video_path,likes 
+    FROM  veverseMySqlDatabase.Video 
+    inner join veverseMySqlDatabase.VideoTags on Video.videoID=VideoTags.videoID
+    where  tagName='${key1}' or tagName='${key2}' or tagName='${key3}' ;`;
+    // Pool.query automatically checks out, uses, and releases a connection
+    // back into the pool, ensuring it is always returned successfully.
+    let queryObj = await pool.query(stmt);
+    queryObj.forEach(row => {
+      jsonResult["results"].push({
+        "videoID": row["videoID"],
+        "thumbnail_path":row["thumbnail_path"] ,
+        "title": row["title"],
+        "views":row["views"],
+        "date": row["date"],
+        "video_path": row["video_path"],
+        "likes":row["likes"]
+      });
+    });
+    res.end(JSON.stringify(jsonResult));
+  } catch (err) {
+    // If something goes wrong, handle the error in this section. This might
+    // involve retrying or adjusting parameters depending on the situation.
+    // [START_EXCLUDE]
+    console.log(err);
+    return res
+      .status(501)
+      .send(
+        'Unable to register.'
+      )
+      .end();
+    // [END_EXCLUDE]
+  }
+  
 });
 
 
+
+
+app.post("/upload/save/file", async (req, res) => {
+
+  try {
+    const myFile = req.file
+    console.log("request received",myFile);
+
+    uploadFile(myFile).then((fileToBeUploaded) => {
+      console.log('Do this');
+      return res.status(200).json({
+        success: true,
+        filePath: fileToBeUploaded
+      })
+  })
+  .catch((error) => {
+    return res.status(500).json({ success: false, error:error })
+  })
+    
+  } catch (error) {
+   return res.status(500).json({success:false,error:"something went wrong"})
+  }
+});
+
+app.post('/upload/video/save', async(req, res) => {
+ 
+  console.log("hitting saving video to db");
+  //console.log('requestBody: ', req.body)
+  
+
+ 
+  var user = req.body.user;
+  var title = req.body.title;
+  var description = req.body.description;
+  var date = req.body.date;
+  var views = req.body.views;
+  var likes = req.body.likes;
+  var categories = req.body.categories;
+  var files = req.files;
+
+  //console.log("request: ", JSON.stringify(req.body)req)
+  console.log("request body: ", JSON.stringify(req.body))
+  console.log("request file: ", JSON.stringify(req.files))
+  
+  try {
+    var videoPath ="fg";
+    var thumbNailPath = "fgsfg";
+    var stmt = `INSERT INTO veverseMySqlDatabase.Video (videoID, title, description,date,views,likes,category,video_path,thumbnail_path,emailID)
+    VALUES (null, '${title}', '${description}','${date}','${views}','${likes}','${categories}','${videoPath}','${thumbNailPath}','${user}' );`;
+    // console.log("sql query",stmt);
+    await pool.query(stmt);
+    var selectVideoId = `select max(videoID) as videoID from veverseMySqlDatabase.Video;`;
+    let resultSql = await pool.query(selectVideoId);
+   
+    const videoID = resultSql[0].videoID;
+    
+    await uploadFile(files[0],videoID).then((fileToBeUploaded) => {
+      console.log('Do this');
+      videoPath= fileToBeUploaded
+    }).catch((error) => {
+      var deleteVideo = `DELETE FROM veverseMySqlDatabase.Video where videoID=${videoID}`;
+      pool.query(deleteVideo);
+      console.log('deleting file');
+      return res.status(500).json({ success: false, error:error }).end();
+    })
+    await uploadFile(files[1],videoID).then((fileToBeUploaded) => {
+      console.log('Do this');
+      thumbNailPath= fileToBeUploaded
+      console.log("filetoBeUploaded",fileToBeUploaded+"  thumbNailPath",thumbNailPath);
+      
+  }).catch((error) => {
+      var deleteImage= `DELETE FROM veverseMySqlDatabase.Video where videoID=${videoID}`;
+      pool.query(deleteImage);
+      console.log('deleting file');
+      return res.status(500).json({ success: false, error:error }).end();
+    })
+
+    console.log("videoPatg",videoPath);
+    console.log("imagePath",thumbNailPath);
+    var updateVideoRow= `UPDATE veverseMySqlDatabase.Video SET video_path = '${videoPath}', thumbnail_path = '${thumbNailPath}' WHERE videoID=${videoID};`;
+    pool.query(updateVideoRow);
+    return res.status(200).json({
+      success: true,
+      videoPath:videoPath,
+      imagePath:thumbNailPath
+    }).end();
+    
+  } catch (err) {
+    
+    console.log(err);
+    return res
+      .status(501)
+      .send(
+        'Unable to upload.'
+      )
+      .end();
+   
+  }
+  
+});
 // Start the server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

@@ -1,0 +1,70 @@
+.UploadVideo {
+    flex: 0.8;
+    background-color: rgb(254, 255, 255);
+    padding: 10px 10px;
+    padding-bottom: 0;
+    margin-left: 50px;
+    justify-content: center;
+  }
+.UploadVideoTitle {
+    text-align: center;
+    font-size: medium;
+    color: black;
+
+    
+}
+.VideoFile {
+    width: 300px;
+    height: 240px;
+    border: 1px solid lightgray;
+    display: flex;
+    align-items: center;
+    justify-content: center ;
+    margin-top: 10px;
+    
+}
+.fa-plus {
+    justify-content: center;
+    color: #6c90b5;
+}
+.UploadVideoLabel {
+    font-size: large;
+    color: black;
+    padding-right: 10px;
+}
+.UploadVideotexts{
+    box-sizing: border-box;
+    border: 2px solid black;
+    border-radius: 1px;
+    width: 100%;
+    padding: 6px 20px;
+    margin: 8px 0;
+    height: 100%;
+    color: black;
+}
+.UploadVideoSelect {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid black;
+    border-radius: 4px;
+    background-color: white;
+  }
+  .UploadFileBlock{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .UploadVideoFile {
+      padding-left: 50px;
+      
+  }
+  .UploadVideoButton {
+    background-color: #a3d2ec; /* Green */
+    border: mediumBlack;
+    color:black;
+    padding: 10px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+  }
+  
