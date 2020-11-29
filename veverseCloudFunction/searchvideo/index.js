@@ -106,7 +106,8 @@ app.get('/:videoID', async (req, res) => {
         "first_name" : row["first_name"],
         "last_name" : row["last_name"],
         "tagName" : row["tagName"],
-        "profile_pic" : row["profile_pic"]
+        "profile_pic" : row["profile_pic"],
+        "firebaseVideoUrl":"Video/" +  row["videoID"] +"/Video.mp4"
       });
     });
     res.end(JSON.stringify(jsonResult));

@@ -1,5 +1,4 @@
 import React from 'react'
-import VideoRow from '../../SearchPage/VideoRow/VideoRow';
 import {useState,useEffect } from 'react'
 import axios from "../../../axios";
 import "./SuggestedVideos.css"
@@ -10,6 +9,9 @@ const SuggestedVideos = ({searchkey}) => {
   const [searchResult, setSearchResult] = useState([]);
   useEffect(()=>{
     async function fetchData() {
+      searchkey = searchkey.replace(/[^A-Za-z0-9 ]/g, '')
+      searchkey = searchkey.replace(/\s\s+/g, ' ')
+      searchkey = searchkey.replace('null','')
       const request = await  axios.post("/searchvideo/", {
         key:`${searchkey}`,
       });

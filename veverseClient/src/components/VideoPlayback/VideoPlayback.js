@@ -11,6 +11,8 @@ import ThumbUpAltIcon from '@material-ui/icons/ThumbUpAlt';
 import {Typography} from '@material-ui/core';
 import numeral from 'numeral';
 import SuggestedVideos from './SuggestedVideos/SuggestedVideos';
+import firebase from "firebase"
+
 
 function VideoPlayback() {
   // let query = useLocation();
@@ -20,11 +22,13 @@ function VideoPlayback() {
   const [videoGerne, setVideoGerne] = useState({})
 
   const [videoComments, setVideoComments] = useState({})
+  const [videoFirebaseUrl, setVideoFirebaseUrl] = useState('')
 
   useEffect(()=>{
     axios.get(`/searchvideo/${videoID}`).then(result=>{
       console.log(result.data.results[0])
       setVideoInfo(result.data.results[0])
+      firebase.storage().ref(result.data.results[0]?.firebaseVideoUrl).getDownloadURL().then(videoUrl => {setVideoFirebaseUrl(videoUrl)})
     }).catch(err => alert(err));
   },[videoID,videoGerne,videoComments]);
   
@@ -34,7 +38,7 @@ function VideoPlayback() {
     <div className='videoPlayback'>
       <div className="videoBlock" >
         <div className="videoBlock_player" >
-          <video src={`${videoInfo?.video_path}`}  autoplay='true' preload="auto" controls></video>
+          <video src={`${videoInfo?.video_path}`}  controls autoplay='true'></video>
         </div>
 
         <div className="videoBlock_description">

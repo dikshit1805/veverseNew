@@ -8,15 +8,18 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import SearchIcon from '@material-ui/icons/Search';
 import UploadVideo from '../UploadVideo/UploadVideo';
+import { useAuth } from "../../contexts/AuthContext"
+
 function NavigationBar() {
   const [inputSearch, setInputSearch] = useState("");
   const [upload, setUpload] = useState("");
+  const { logout } = useAuth()
+
   return (
     <div className="navigationbar">
-      
       <div className="header_left">
         <MenuIcon className="menuicon"/>
-        <Link className="header_left_link" to="/" >
+        <Link className="header_left_link" to="/home" >
           <h3>Veverse</h3>
         </Link>
       </div>
@@ -29,14 +32,9 @@ function NavigationBar() {
       </div>
       
       <div className="header_right">
-         
-      
-      <Link to={`upload/`} ><VideoCallIcon className="header_right_icon" onClick={e => setUpload(e.target.value)} value={upload}/></Link>
-      
-         
-        
-        <AccountCircleIcon className="header_right_icon"/>
-        <ExitToAppIcon className="header_right_icon"/>
+        <Link to={`/upload`} ><VideoCallIcon className="header_right_icon" onClick={e => setUpload(e.target.value)} value={upload}/></Link>
+        <Link to={"/loginPage"}><AccountCircleIcon className="header_right_icon"/></Link>
+        <ExitToAppIcon className="header_right_icon" onClick={logout}/>
       </div>
     </div>
   )
