@@ -4,7 +4,6 @@
 }
 
 .videoBlock {
-  height:150vh;
   overflow-y: scroll;
   flex:.75;
   display: flex;
@@ -18,7 +17,6 @@
   display: none;
 }
 .videoBlock_player {
-  flex:1;
   margin-bottom:10px;
   justify-content: center;
   align-items: center;
@@ -35,7 +33,6 @@
 
 .videoBlock_description {
   background-color: inherit;
-  height: 40vh;
   margin-bottom:10px;
   border: 4px solid white;
   border-radius: 8px;
@@ -133,7 +130,6 @@
 
 .videoBlock_comments {
   background-color: inherit;
-  height: 70vh;
   margin-bottom:10px;
   border: 4px solid white;
   overflow: scroll;
@@ -161,9 +157,12 @@
   display: none;
 }
 
-@media screen and (max-width: 850px) {
+@media screen and (max-width: 750px) {
   .videoRecommendation {
-    display:none;
+    flex:1;
+  }
+  .videoPlayback {
+    flex-direction: column;
   }
   .videoBlock{
     flex:1;

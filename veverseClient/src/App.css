@@ -13,8 +13,12 @@ body {
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   --webkit-font-smoothing: antialiased;
   --moz-osx-font-smoothing: grayscale;
-}
 
+}
+.app {
+  background-image: "loginBackground.jpg";
+  /* background-color: black; */
+}
 code {
   font-family: source-code-pro, Menlo, Monaca, Consolas, "Courier New", Courier,
     monospace;

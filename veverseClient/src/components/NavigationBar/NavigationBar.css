@@ -69,6 +69,14 @@
   border-left: 1px solid gray;
 }
 
+@media screen and (max-width: 750px) {
+  .searchbox {
+    display:none;
+  }
+}
+
+
+
 /* Right */
 .header_right {
   display: flex;
@@ -76,7 +84,9 @@
 }
 
 .header_right_icon {
-  margin-right: 5px;
+  margin-right: 1rem;
+  text-decoration: none!important;
+  color: black;
 }
 
 .header_right_icon:hover {
@@ -84,3 +94,5 @@
   color: rgb(119, 119, 201);
   cursor: pointer;
 }
+
+

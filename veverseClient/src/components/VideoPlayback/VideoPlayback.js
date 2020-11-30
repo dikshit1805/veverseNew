@@ -2,7 +2,6 @@ import React from 'react';
 // import { useQuery, useParams } from 'react-query';
 // import { useLocation } from 'react-router';
 import {useEffect, useState} from 'react';
-import ReactPlayer from 'react-player/lazy'
 import { Avatar, Grid } from '@material-ui/core';
 import "./videoPlayback.css"
 import {useParams } from 'react-router-dom';
@@ -11,7 +10,6 @@ import ThumbUpAltIcon from '@material-ui/icons/ThumbUpAlt';
 import {Typography} from '@material-ui/core';
 import numeral from 'numeral';
 import SuggestedVideos from './SuggestedVideos/SuggestedVideos';
-import firebase from "firebase"
 
 
 function VideoPlayback() {
@@ -19,18 +17,14 @@ function VideoPlayback() {
   // console.log(query.path);
   const {videoID} = useParams();
   const [videoInfo, setVideoInfo] = useState({})
-  const [videoGerne, setVideoGerne] = useState({})
 
-  const [videoComments, setVideoComments] = useState({})
-  const [videoFirebaseUrl, setVideoFirebaseUrl] = useState('')
+  // const [videoComments, setVideoComments] = useState({})
 
   useEffect(()=>{
     axios.get(`/searchvideo/${videoID}`).then(result=>{
-      console.log(result.data.results[0])
       setVideoInfo(result.data.results[0])
-      firebase.storage().ref(result.data.results[0]?.firebaseVideoUrl).getDownloadURL().then(videoUrl => {setVideoFirebaseUrl(videoUrl)})
     }).catch(err => alert(err));
-  },[videoID,videoGerne,videoComments]);
+  },[videoID]);
   
 
 
@@ -38,11 +32,11 @@ function VideoPlayback() {
     <div className='videoPlayback'>
       <div className="videoBlock" >
         <div className="videoBlock_player" >
-          <video src={`${videoInfo?.video_path}`}  controls autoplay='true'></video>
+          <video src={`${videoInfo?.video_path}`}  controls autoPlay></video>
         </div>
 
         <div className="videoBlock_description">
-          <Grid xm={12} lg={12} container >
+          <Grid  container >
 
             <Grid  sm={12} lg={12} item className="videoBlock_description_title">
               <Typography variant="h3"> {videoInfo?.title}</Typography>
@@ -77,9 +71,9 @@ function VideoPlayback() {
           </Grid>
         </div>
       
-        <div className="videoBlock_comments">
+        {/* <div className="videoBlock_comments">
           Comments
-        </div>
+        </div> */}
       </div>
 
       <div className="videoRecommendation">

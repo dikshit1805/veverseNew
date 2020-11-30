@@ -18,7 +18,6 @@ function SearchPage() {
       return(request.data.results);
     }
     fetchData().then(result=>{
-      console.log(searchkey, result);
       setSearchResult(result)
     });
 

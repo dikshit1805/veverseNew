@@ -9,17 +9,17 @@ const SuggestedVideos = ({searchkey}) => {
   const [searchResult, setSearchResult] = useState([]);
   useEffect(()=>{
     async function fetchData() {
-      searchkey = searchkey.replace(/[^A-Za-z0-9 ]/g, '')
-      searchkey = searchkey.replace(/\s\s+/g, ' ')
-      searchkey = searchkey.replace('null','')
+      let skey = searchkey
+      skey = skey.replace(/[^A-Za-z0-9 ]/g, '')
+      skey = skey.replace(/\s\s+/g, ' ')
+      skey = skey.replace('null','')
       const request = await  axios.post("/searchvideo/", {
-        key:`${searchkey}`,
+        key:`${skey}`,
       });
 
       return(request.data.results);
     }
     fetchData().then(result=>{
-      console.log(searchkey, result);
       setSearchResult(result)
     });
 

@@ -1,25 +1,19 @@
-import React, {useState} from 'react';
+import React from 'react';
 import './App.css';
 import LeftMenuBar from './components/LeftMenuBar/LeftMenuBar';
-// import NavBar from "./components/NavBar/NavBar"
 import NavigationBar from './components/NavigationBar/NavigationBar';
 import VideoBlock from './components/VideoBlock/VideoBlock';
-import {BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom"
+import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
 import SearchPage from './components/SearchPage/SearchPage';
 import VideoPlayback from './components/VideoPlayback/VideoPlayback';
-import UploadVideo from './components/UploadVideo/UploadVideo';
-import LoginInUser from './components/Login/LoginInUser';
-
 import Signup from "./components/Login/Signup"
-import { AuthProvider, useAuth } from "./contexts/AuthContext"
-import Dashboard from "./components/Login/Dashboard"
+import { useAuth } from "./contexts/AuthContext"
 import Login from "./components/Login/Login"
-import PrivateRoute from "./PrivateRoute"
 import ForgotPassword from "./components/Login/ForgotPassword"
 import UpdateProfile from "./components/Login/UpdateProfile"
 import { Container } from "react-bootstrap"
 import "bootstrap/dist/css/bootstrap.min.css"
-//import Upload from './components/Upload/Upload';
+import Upload from './components/Upload/Upload';
 
 
 function App() {
@@ -28,9 +22,9 @@ function App() {
   return(
     <div className="app">
       <Router>
-        <Switch>
+        
          {currentUser ? 
-         <>
+         <Switch>
           <Route path="/searchvideo/:videoID">
             <NavigationBar/>
             <div className="app_body">
@@ -50,7 +44,7 @@ function App() {
             <NavigationBar/>  
             <div className="app_body">
               <LeftMenuBar/>
-              {/* <Upload/> */}
+              <Upload/>
             </div>
           </Route>
 
@@ -77,26 +71,51 @@ function App() {
               </div>
             </Container>
           </Route>
+          
+          <Route path="/update-profile">  
+            <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
+              <div className="w-100" style={{ maxWidth: "400px" }}>
+                <UpdateProfile/>
+              </div>
+            </Container>
+          </Route>
 
-          <Route exact path="/">
+          <Route path="/">
             <NavigationBar/>
             <div className="app_body">
               <LeftMenuBar/>
               <VideoBlock/>
             </div>
           </Route>
-          </>
+          </Switch>
           :
+          <Switch>
+          <Route exact path="/signup">  
+          <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
+            <div className="w-100" style={{ maxWidth: "400px" }}>
+                <Signup/>
+            </div>
+          </Container>
+          </Route>
+
+          <Route exact path="/forgot-password">  
+            <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
+              <div className="w-100" style={{ maxWidth: "400px" }}>
+                <ForgotPassword/>
+              </div>
+            </Container>
+          </Route>
+
           <Route path="/">   
             <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
             <div className="w-100" style={{ maxWidth: "400px" }}>
               <Login/>
             </div>
             </Container>
-            <Redirect to="/"/>
           </Route>
+          </Switch>
           }
-        </Switch>
+        
       </Router>
     </div>);
 }

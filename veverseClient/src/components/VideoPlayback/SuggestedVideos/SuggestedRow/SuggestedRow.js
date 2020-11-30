@@ -30,13 +30,15 @@ function SuggestedRow({videoID, thumbnail_path, title, views, date, likes, video
   const classes = useStyles();
   return (
     <Link className="suggestedRow_link" to={{pathname:`/searchvideo/${videoID}`}}>
-      <div className="suggestedRow">  
-        <img src={thumbnail_path} alt={noimage}/>
+      <div className="suggestedRow">
+        <div className="suggestedRow__img">  
+          <img src={thumbnail_path} alt={noimage}/>
+        </div>
         <div className="suggestedRow__text">
           <h3>{title}</h3>
-            <div class="suggestedRow__body">
-            <div class="suggestedRow__body__img"><Avatar className={classes.small} src={`${profile_pic}`}></Avatar></div>
-            <div class="suggestedRow__body__details"><p>{numeral(views).format('0.0a').toUpperCase()} Views •	{numeral(likes).format('0.0a').toUpperCase()} Likes</p> 
+            <div className="suggestedRow__body">
+            <div className="suggestedRow__body__img"><Avatar className={classes.small} src={`${profile_pic}`}></Avatar></div>
+            <div className="suggestedRow__body__details"><p>{numeral(views).format('0.0a').toUpperCase()} Views •	{numeral(likes).format('0.0a').toUpperCase()} Likes</p> 
                 <p>{moment(date.toLocaleTimeString() + ' ' + date.toLocaleDateString(),"h:mm:ss a DD/MM/YYYY").fromNow()}</p></div>
           </div>
         </div>
