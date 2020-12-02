@@ -30,7 +30,11 @@ function NavigationBar() {
       </div>
       
       <div className="header_right">
+
+        
+
         <Link to={`/upload`} ><VideoCallIcon className="header_right_icon" /></Link>
+
         <Link to={"/update-profile"}><AccountCircleIcon className="header_right_icon"/></Link>
         <ExitToAppIcon className="header_right_icon" onClick={logout}/>
       </div>

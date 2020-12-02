@@ -44,18 +44,32 @@ app.use(async (req, res, next) => {
 
 // getVideo Temp Video ID
 app.post('/', async (req, res) => {
+  console.log("hitting");
+  var title = req.body.title;
+  var user=req.body.user;
+  var description = req.body.description;
+  var views = req.body.views;
+  var likes = req.body.likes;
+  var categories = req.body.categories;
+  var tags = req.body.tags;
+  console.log("request is ",JSON.stringify(req.body));
   try {
     let videoPath ="NoVideo";
     let thumbNailPath = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
     let date = new Date(Date.now()).toISOString().substring(0,19).replace('T',' ');
-    var stmt = `INSERT INTO veverseMySqlDatabase.Video (title, description,date,views,likes,category,video_path,thumbnail_path,emailID)
-    VALUES ('${req.body.title}', '${req.body.description}','${date}','0','0','${req.body.category}','${videoPath}','${thumbNailPath}','${req.body.emailID}' );`;
+    var stmt = `INSERT INTO veverseMySqlDatabase.Video (videoID, title, description,date,views,likes,category,video_path,thumbnail_path,emailID)
+    VALUES (null, '${title}', '${description}','${date}','${views}','${likes}','${categories}','${videoPath}','${thumbNailPath}','${user}' );`;
+    
     let queryObj = await pool.query(stmt);
     var selectVideoId = `select max(videoID) as videoID from veverseMySqlDatabase.Video;`;
     let resultSql = await pool.query(selectVideoId);
+    let videoID= resultSql[0].videoID
+    console.log(videoID)
+    let updateVideoTag = `insert into veverseMySqlDatabase.VideoTags(tag_index,videoID,tagName) values(null,'${videoID}' ,'${tags}')`
+    pool.query(updateVideoTag);
     return res.status(200).json({
       success: true,
-      videoID: resultSql[0].videoID
+      videoID: videoID
     }).end();
   } catch (err) {
     console.log(err);
@@ -87,7 +101,10 @@ app.put('/update', async (req, res) => {
 
 //Delete in case the upload fails
 app.delete('/delete', async (req, res) => {
+  console.log("delete videoID",req.body.videoID)
   try {
+    var deleteTags=`delete  FROM veverseMySqlDatabase.VideoTags where videoID=${req.body.videoID}`
+    await pool.query(deleteTags);
     var stmt =  `DELETE FROM veverseMySqlDatabase.Video where videoID=${req.body.videoID}`;
     let queryObj = await pool.query(stmt);
     return res.status(200).json({
@@ -112,3 +129,4 @@ app.listen(PORT, () => {
 module.exports = {
     app
 };
+

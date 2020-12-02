@@ -13,7 +13,10 @@ import ForgotPassword from "./components/Login/ForgotPassword"
 import UpdateProfile from "./components/Login/UpdateProfile"
 import { Container } from "react-bootstrap"
 import "bootstrap/dist/css/bootstrap.min.css"
-import Upload from './components/Upload/Upload';
+
+import Upload from './components/UploadVideo/Upload';
+
+
 
 
 function App() {
@@ -31,7 +34,6 @@ function App() {
               <VideoPlayback/>
             </div>
           </Route>
-
           <Route path="/Search/:searchkey">
             <NavigationBar/>
             <div className="app_body">
