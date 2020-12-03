@@ -5,21 +5,21 @@ import axios from "../../axios";
 import {useState,useEffect } from 'react'
 import {Link} from "react-router-dom"
 
-function VideoBlock() {
+function VideoBlock({query,heading,email }) {
   const [recommendations, setrecommendations] = useState([]);
   
   useEffect(()=>{
     async function fetchData() {
-      const request = await  axios.get("/recommendation");
+      const request = await  axios.get(`${query}?emailID=${email}`);
       return(request.data.results);
     }
     fetchData().then(result=>{setrecommendations(result)});
     
-  },[]);
+  },[query, email]);
 
   return (
     <div className="videoblock">
-      <h2>Recommendation</h2>
+      <h2>{heading}</h2>
       
       <div className="videoblockvideo" >
         {recommendations.map((result) => (

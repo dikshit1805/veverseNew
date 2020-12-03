@@ -15,12 +15,26 @@ import { Container } from "react-bootstrap"
 import "bootstrap/dist/css/bootstrap.min.css"
 
 import Upload from './components/UploadVideo/Upload';
+import axios  from './axios';
 
 
 
 
 function App() {
-  const {currentUser} = useAuth()
+  const {currentUser, updateProfileURL} = useAuth()
+  
+  if(currentUser){
+    if(!currentUser.profileURL) {
+      async function fetchData() {
+        const request = await  axios.get(`/myvideos/profile_pic?emailID=${currentUser.email}`);
+        console.log(request);
+        return(request.data.profile_pic);
+      }
+      fetchData().then(url=>{updateProfileURL(url)});
+    }
+    
+  }
+
   console.log(currentUser);
   return(
     <div className="app">
@@ -82,11 +96,19 @@ function App() {
             </Container>
           </Route>
 
+          <Route path="/myvideos">
+            <NavigationBar/>
+            <div className="app_body">
+              <LeftMenuBar/>
+              <VideoBlock query="/myvideos" heading="My Videos" email={currentUser.email}/>
+            </div>
+          </Route>
+
           <Route path="/">
             <NavigationBar/>
             <div className="app_body">
               <LeftMenuBar/>
-              <VideoBlock/>
+              <VideoBlock query="/recommendation" heading="Recommended" email={currentUser.email}/>
             </div>
           </Route>
           </Switch>

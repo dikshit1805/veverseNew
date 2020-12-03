@@ -12,7 +12,7 @@ export default function Signup() {
   const lastRef = useRef()
   const passwordRef = useRef()
   const passwordConfirmRef = useRef()
-  const {signup } = useAuth()
+  const {signup, updateProfileURL } = useAuth()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const history = useHistory()
@@ -36,20 +36,18 @@ export default function Signup() {
       setLoading(true)
       let emaiID = emailRef.current.value;
       let password = passwordRef.current.value;
-      console.log("E1", emaiID, password);
       await signup(emailRef.current.value, passwordRef.current.value)
-      console.log("E2", emaiID, profileName.name);
       await firebase.storage().ref(`User/${emaiID}/${profileName.name}`).put(profileName);
-      console.log("E3", emaiID, profileName.name);
       let imageURL = await firebase.storage().ref(`User/${emaiID}`).child(`${profileName.name}`).getDownloadURL()
-      
       await axios.post("/registeruser", {
         "emailID":`${emailRef.current.value}`,
         "first_name":`${firstRef.current.value}`,
         "last_name":`${lastRef.current.value}`,
         "profile_pic":`${imageURL}`
       })
-      
+
+      // await updateProfileURL(imageURL);
+      // console.log(imageURL)
       history.push("/")
     } catch(error) {
       console.log(error)

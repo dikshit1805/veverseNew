@@ -11,7 +11,17 @@
   margin-bottom: 2px;
 }
 
+
 .leftmenubar_link {
   text-decoration: none;
   color: black;
+}
+
+.leftmenubar_link:hover {
+  text-decoration: none;
+  color: black;
+}
+
+.menurow:hover {
+  background-color: rgb(208, 202, 202);
 }

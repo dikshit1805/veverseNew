@@ -15,6 +15,7 @@
   color: black;
   position: left;
   align-self: center;
+  align-items: center;
 }
 
 .header_left_link {
@@ -81,6 +82,7 @@
 .header_right {
   display: flex;
   align-self: center;
+  align-items: center;
 }
 
 .header_right_icon {
